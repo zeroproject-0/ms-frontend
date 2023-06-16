@@ -1,7 +1,6 @@
 import { useChat } from '@/context';
 import { MessageItem } from './MessageItem';
 import { useEffect, useRef } from 'react';
-// import { useEffect } from 'react';
 
 export function MessageList() {
 	const { currentChat } = useChat();

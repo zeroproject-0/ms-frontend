@@ -2,7 +2,7 @@ import { useChat } from '@/context';
 import React, { useRef, useState } from 'react';
 
 export function FormMessage() {
-	const { sendMessage } = useChat();
+	const { sendMessage, currentChat } = useChat();
 	const [value, setValue] = useState('');
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +15,8 @@ export function FormMessage() {
 		setIsLoading(false);
 		if (inputRef.current) inputRef.current.value = '';
 	}
+
+	if (currentChat._id === '') return null;
 
 	return (
 		<form

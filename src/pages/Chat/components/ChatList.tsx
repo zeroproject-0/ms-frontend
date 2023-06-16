@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 export function ChatList() {
 	const { user } = useAuth();
-	const { chats, selectChat } = useChat();
+	const { chats, currentChat, selectChat } = useChat();
 
 	useEffect(() => {
 		// console.log('chats', chats);
@@ -12,6 +12,7 @@ export function ChatList() {
 	return (
 		<div className="flex flex-col space-y-1 mt-4 -mx-2 h-48 overflow-y-auto">
 			{chats.map((chat) => {
+				const isChatSelected = chat._id === currentChat._id;
 				const otherUser = chat.members.find(
 					(member) => member.user._id !== user._id
 				)?.user;
@@ -19,7 +20,9 @@ export function ChatList() {
 				return (
 					<button
 						onClick={() => selectChat(chat)}
-						className="flex flex-row items-center hover:bg-gray-100 rounded-xl p-2"
+						className={`flex flex-row items-center ${
+							isChatSelected ? 'bg-indigo-500' : 'hover:bg-gray-100'
+						}  rounded-xl p-2`}
 					>
 						<div className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full">
 							{chat.isPrivate && otherUser

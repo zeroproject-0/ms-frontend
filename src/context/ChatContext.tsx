@@ -19,7 +19,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	const [chats, setChats] = useState<Chat[]>([]);
 
 	function selectChat(chat: Chat) {
-		console.log('chat: ', chat);
 		chat.unreadMessages = 0;
 		setCurrentChat(chat);
 	}
@@ -38,7 +37,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		const onChatsEvent = (data: Chat[]) => {
 			const chats = data.map((chat) => {
-				console.log('chat: ', chat);
 				if (chat._id === currentChat._id) chat.unreadMessages = 0;
 				chat.messages = chat.messages.map((message) => {
 					message.fromSelf = user._id === message.from;
@@ -51,15 +49,11 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 		};
 
 		function onMessageEvent(message: MessageReceived) {
-			// console.log('message: ', message);
-
 			setChats((chats) => {
 				const newChats = [...chats];
 				const chatIndex = newChats.findIndex((chat) => chat._id === message.to);
 				message.fromSelf = user._id === message.from;
 				newChats[chatIndex].messages.push(message);
-				// console.log('newChats: ', currentChat._id !== newChats[chatIndex]._id);
-				console.log({ message, currentChat, chatIndex });
 				if (currentChat._id !== message.to) {
 					newChats[chatIndex].unreadMessages
 						? newChats[chatIndex].unreadMessages++
@@ -72,7 +66,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 		}
 
 		function onChatCreated(chat: Chat) {
-			// console.log('chat: ', chat);
 			socket.emit('join_chat', chat._id);
 			setChats((chats) => {
 				const newChats = [...chats];
@@ -81,14 +74,20 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 			});
 		}
 
+		function onChatJoined(chatID: string) {
+			console.log('joined_chat', { chatID });
+		}
+
 		socket.on('chats', onChatsEvent);
 		socket.on('private_message', onMessageEvent);
 		socket.on('chat_created', onChatCreated);
+		socket.on('chat_joined', onChatJoined);
 
 		return () => {
 			socket.off('chats', onChatsEvent);
 			socket.off('private_message', onMessageEvent);
 			socket.off('chat_created', onChatCreated);
+			socket.off('chat_joined', onChatJoined);
 		};
 	}, [user, currentChat]);
 
