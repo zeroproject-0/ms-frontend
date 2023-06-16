@@ -8,14 +8,18 @@ import { useSocket } from '.';
 export const AuthContext = createContext<UserContext>({} as UserContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-	const { socket } = useSocket();
+	const { socket, sessionID, removeSessionID } = useSocket();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [errors, setErrors] = useState<string[]>([]);
-	const [user, setUser] = useState<User | never>({} as User);
+	const [user, setUser] = useState<User | never>(null as never);
 
 	const signIn = async (data: UserLogin) => {
 		try {
 			const response = await loginRequest(data);
+
+			if (!response.data.data) {
+				throw new Error('No data received');
+			}
 
 			const token = response.data.data.token as string;
 			const user = response.data.data.user as User;
@@ -34,10 +38,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const logout = async () => {
 		try {
 			await logoutRequest();
+			setUser(null as never);
 			setIsAuthenticated(false);
-			socket.auth = { token: null };
+			socket.auth = { token: null, sessionID: null };
 			socket.connected && socket.disconnect();
-			localStorage.removeItem('sessionID');
+			removeSessionID();
 		} catch (error) {
 			console.log((error as AxiosError).response);
 			setErrors((error as AxiosError).response?.data as string[]);
@@ -58,35 +63,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	useEffect(() => {
 		async function checkLogin() {
 			const token = Cookies.get('token');
-			const sessionID = localStorage.getItem('sessionID') as string;
-			console.log('sessionID: ', sessionID);
 
-			if (!token) {
+			if (!token || sessionID === '') {
 				setIsAuthenticated(false);
 				setUser(null as never);
 				socket.auth = { token: null, sessionID: null };
+				socket.connected && socket.disconnect();
 				return;
 			}
 
 			try {
 				const res = await validateTokenRequest();
 
-				const user = res.data.data as User;
-				setUser(user);
+				const newUser = res.data.data as User;
+				setUser(newUser);
 				setIsAuthenticated(true);
-				socket.auth = { token };
-				if (sessionID) socket.auth.sessionID = sessionID;
-				console.log('socket.auth');
-				console.log(socket.auth);
-				!socket.connected && socket.connect();
+				socket.auth = { token, sessionID };
+				socket.disconnect();
+				setTimeout(() => {
+					socket.connect();
+				}, 100);
 			} catch (error) {
 				setIsAuthenticated(false);
 				setUser(null as never);
 				socket.auth = { token: null, sessionID: null };
 			}
 		}
-		checkLogin();
-	}, []);
+
+		async function fetchData() {
+			await checkLogin();
+		}
+		fetchData();
+	}, [sessionID]);
 
 	return (
 		<AuthContext.Provider
