@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: ms-frontend-react
+    image: ms-frontend-react
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    expose:
+      - 80
+    networks:
+      - nginx_proxy_default
+      - ms_chat_default
+
+networks:
+  nginx_proxy_default:
+    external: true
+  
+  ms_chat_default:
+    driver: bridge 

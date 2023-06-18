@@ -3,7 +3,9 @@ import { createContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const socket = io('http://localhost:5000');
+const SOCKET_URL = import.meta.env.VITE_API_CHATS;
+
+const socket = io(SOCKET_URL);
 
 export const SocketContext = createContext<SocketContextType | never>(
 	null as never
