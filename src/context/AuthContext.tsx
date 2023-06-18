@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			const token = response.data.data.token as string;
 			const user = response.data.data.user as User;
 			user.token = token;
+			Cookies.set('token', token);
 			socket.auth = { token };
 			socket.connect();
 			setUser(user);
