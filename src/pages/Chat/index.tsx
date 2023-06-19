@@ -9,7 +9,6 @@ import { User } from '@/types/User';
 import { Modal } from '@/components/Modal';
 import { getAllUsersRequest } from '@/api/users';
 import { Chat } from '@/types/Chat';
-import { set } from 'react-hook-form';
 
 export function ChatPage() {
 	const { socket } = useSocket();
