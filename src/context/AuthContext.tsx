@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const signUp = async (data: UserRegister) => {
 		try {
+			setUser(null as never);
 			const response = await registerRequest(data);
 
 			if (!response.data.data) {
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			}
 
 			const token = response.data.data.token;
-			const user = response.data.data;
+			const user = response.data.data.user;
 			user.token = token;
 			Cookies.set('token', token);
 			socket.auth = { token };

@@ -9,7 +9,10 @@ export const loginRequest = (user: UserLogin) =>
 	);
 
 export const registerRequest = (user: UserRegister) =>
-	axios.post<{ message: string; data: User }>(`/auth/signup`, user);
+	axios.post<{ message: string; data: { user: User; token: string } }>(
+		`/auth/signup`,
+		user
+	);
 
 export const logoutRequest = () => axios.post(`/auth/logout`);
 
