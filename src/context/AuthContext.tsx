@@ -9,14 +9,30 @@ import { User, UserContext, UserLogin, UserRegister } from '../types/User';
 import { AxiosError } from 'axios';
 import { Cookies } from 'typescript-cookie';
 import { useSocket } from '.';
+import { addContactRequest } from '@/api/users';
 
 export const AuthContext = createContext<UserContext>({} as UserContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const { socket, sessionID, removeSessionID } = useSocket();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [errors, setErrors] = useState<any[]>([]);
+	const [errors, setErrors] = useState<{ message: string }[]>([]);
 	const [user, setUser] = useState<User | never>(null as never);
+
+	const addContact = async (contactID: string) => {
+		try {
+			const response = await addContactRequest(user._id, contactID);
+			if (!response.data.data) {
+				throw new Error('No data received');
+			}
+
+			const newUser = response.data.data;
+			setUser(newUser);
+		} catch (error) {
+			console.log((error as AxiosError).response);
+			setErrors([(error as AxiosError).response?.data as { message: string }]);
+		}
+	};
 
 	const signUp = async (data: UserRegister) => {
 		try {
@@ -36,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			setIsAuthenticated(true);
 		} catch (error) {
 			console.log((error as AxiosError).response);
-			setErrors([(error as AxiosError).response?.data]);
+			setErrors([(error as AxiosError).response?.data as { message: string }]);
 			socket.auth = { token: null, sessionID: null };
 		}
 	};
@@ -46,7 +62,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			const response = await loginRequest(data);
 
 			if (!response.data.data) {
-				// setErrors([response.data.message]);
 				throw new Error('No data received');
 			}
 
@@ -59,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			setIsAuthenticated(true);
 		} catch (error) {
 			console.log((error as AxiosError).response);
-			setErrors([(error as AxiosError).response?.data]);
+			setErrors([(error as AxiosError).response?.data as { message: string }]);
 			socket.auth = { token: null, sessionID: null };
 		}
 	};
@@ -75,7 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			removeSessionID();
 		} catch (error) {
 			console.log((error as AxiosError).response);
-			setErrors((error as AxiosError).response?.data as string[]);
+			setErrors([(error as AxiosError).response?.data as { message: string }]);
 		}
 	};
 
@@ -128,7 +143,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<AuthContext.Provider
-			value={{ user, signUp, signIn, logout, isAuthenticated, errors }}
+			value={{
+				user,
+				addContact,
+				signUp,
+				signIn,
+				logout,
+				isAuthenticated,
+				errors,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

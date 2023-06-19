@@ -29,10 +29,11 @@ export interface User extends UserBase {
 export interface UserContext {
 	user: User;
 	signUp: (user: UserRegister) => void;
-	signIn: (user: UserLogin) => Promise<void>;
+	signIn: (user: UserLogin) => void;
 	logout: () => Promise<void>;
+	addContact: (contactID: string) => void;
 	isAuthenticated: boolean;
-	errors: string[];
+	errors: { message: string }[];
 }
 
 export interface MessageBase {

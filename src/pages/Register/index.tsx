@@ -70,7 +70,7 @@ export function RegisterPage() {
 						register={register}
 						errors={errors}
 					/>
-					{requestErrors.map((error: any) => (
+					{requestErrors.map((error) => (
 						<span className="text-red-600">{error.message}</span>
 					))}
 					<div>

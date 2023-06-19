@@ -18,7 +18,6 @@ export function LoginPage() {
 	const onSubmit = handleSubmit(async (data) => signIn(data as UserLogin));
 
 	useEffect(() => {
-		console.log('Request: ', requestErrors);
 		if (isAuthenticated) {
 			navigate('/chat');
 		}
@@ -49,7 +48,7 @@ export function LoginPage() {
 						register={register}
 						errors={errors}
 					/>
-					{requestErrors.map((error: any) => (
+					{requestErrors.map((error) => (
 						<span className="text-red-600">{error.message}</span>
 					))}
 					<div>

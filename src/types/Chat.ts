@@ -9,6 +9,7 @@ export interface ChatContext {
 
 export interface ChatBase {
 	name: string;
+	description: string;
 	members: { user: User; isAdmin: boolean }[];
 	isPrivate: boolean;
 	messages: MessageReceived[];
@@ -22,6 +23,7 @@ export interface Chat extends ChatBase {
 export const createDefaultChat = (): Chat => {
 	return {
 		name: '',
+		description: '',
 		members: [],
 		isPrivate: false,
 		messages: [],
