@@ -3,6 +3,12 @@ export interface UserLogin {
 	password: string;
 }
 
+export interface UserRegister extends UserLogin {
+	name: string;
+	lastname: string;
+	nickname: string;
+}
+
 export interface UserBase {
 	_id: string;
 	email: string;
@@ -22,6 +28,7 @@ export interface User extends UserBase {
 
 export interface UserContext {
 	user: User;
+	signUp: (user: UserRegister) => void;
 	signIn: (user: UserLogin) => Promise<void>;
 	logout: () => Promise<void>;
 	isAuthenticated: boolean;

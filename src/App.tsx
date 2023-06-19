@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import './App.css';
 import { LoginPage } from './pages/Login';
@@ -7,6 +7,7 @@ import { ChatPage } from './pages/Chat';
 import { ProtectedRoute } from './ProtectedRoute';
 import { SocketProvider } from './context/SocketContext';
 import { ChatProvider } from './context/ChatContext';
+import { RegisterPage } from './pages/Register';
 
 function App() {
 	return (
@@ -15,7 +16,8 @@ function App() {
 				<ChatProvider>
 					<BrowserRouter>
 						<Routes>
-							<Route path="/" element={<LoginPage />} />
+							<Route index element={<LoginPage />} />
+							<Route path="/register" element={<RegisterPage />} />
 
 							<Route element={<ProtectedRoute />}>
 								<Route path="/chat" element={<ChatPage />} />

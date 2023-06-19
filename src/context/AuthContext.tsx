@@ -1,6 +1,11 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { loginRequest, logoutRequest, validateTokenRequest } from '../api/auth';
-import { User, UserContext, UserLogin } from '../types/User';
+import {
+	loginRequest,
+	logoutRequest,
+	registerRequest,
+	validateTokenRequest,
+} from '../api/auth';
+import { User, UserContext, UserLogin, UserRegister } from '../types/User';
 import { AxiosError } from 'axios';
 import { Cookies } from 'typescript-cookie';
 import { useSocket } from '.';
@@ -10,19 +15,19 @@ export const AuthContext = createContext<UserContext>({} as UserContext);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const { socket, sessionID, removeSessionID } = useSocket();
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [errors, setErrors] = useState<string[]>([]);
+	const [errors, setErrors] = useState<any[]>([]);
 	const [user, setUser] = useState<User | never>(null as never);
 
-	const signIn = async (data: UserLogin) => {
+	const signUp = async (data: UserRegister) => {
 		try {
-			const response = await loginRequest(data);
+			const response = await registerRequest(data);
 
 			if (!response.data.data) {
 				throw new Error('No data received');
 			}
 
-			const token = response.data.data.token as string;
-			const user = response.data.data.user as User;
+			const token = response.data.data.token;
+			const user = response.data.data;
 			user.token = token;
 			Cookies.set('token', token);
 			socket.auth = { token };
@@ -31,7 +36,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			setIsAuthenticated(true);
 		} catch (error) {
 			console.log((error as AxiosError).response);
-			setErrors((error as AxiosError).response?.data as string[]);
+			setErrors([(error as AxiosError).response?.data]);
+			socket.auth = { token: null, sessionID: null };
+		}
+	};
+
+	const signIn = async (data: UserLogin) => {
+		try {
+			const response = await loginRequest(data);
+
+			if (!response.data.data) {
+				// setErrors([response.data.message]);
+				throw new Error('No data received');
+			}
+
+			const { token, user } = response.data.data;
+			user.token = token;
+			Cookies.set('token', token);
+			socket.auth = { token };
+			socket.connect();
+			setUser(user);
+			setIsAuthenticated(true);
+		} catch (error) {
+			console.log((error as AxiosError).response);
+			setErrors([(error as AxiosError).response?.data]);
 			socket.auth = { token: null, sessionID: null };
 		}
 	};
@@ -41,6 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 			await logoutRequest();
 			setUser(null as never);
 			setIsAuthenticated(false);
+			Cookies.remove('token');
 			socket.auth = { token: null, sessionID: null };
 			socket.connected && socket.disconnect();
 			removeSessionID();
@@ -99,7 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 	return (
 		<AuthContext.Provider
-			value={{ user, signIn, logout, isAuthenticated, errors }}
+			value={{ user, signUp, signIn, logout, isAuthenticated, errors }}
 		>
 			{children}
 		</AuthContext.Provider>

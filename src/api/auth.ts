@@ -1,9 +1,15 @@
 import { axios } from './axios';
 
-import { UserLogin } from '../types/User';
+import { User, UserLogin, UserRegister } from '../types/User';
 
 export const loginRequest = (user: UserLogin) =>
-	axios.post(`/auth/signin`, user);
+	axios.post<{ message: string; data: { user: User; token: string } }>(
+		`/auth/signin`,
+		user
+	);
+
+export const registerRequest = (user: UserRegister) =>
+	axios.post<{ message: string; data: User }>(`/auth/signup`, user);
 
 export const logoutRequest = () => axios.post(`/auth/logout`);
 
