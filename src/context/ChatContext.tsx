@@ -6,6 +6,7 @@ import {
 	ChatContext as ChatContextType,
 	createDefaultChat,
 } from '@/types/Chat';
+import { sendLog } from '@/api/users';
 
 export const ChatContext = createContext<ChatContextType>(
 	{} as ChatContextType
@@ -30,6 +31,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 			to: currentChat._id,
 			fromSelf: true,
 		};
+
+		sendLog({
+			metodo: 'socket',
+			peticion: 'chat/message',
+			respuesta: 'message',
+			servicio: 'frontend',
+		});
 
 		socket.emit('private_message', message);
 	}
@@ -67,6 +75,12 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
 		function onChatCreated(chat: Chat) {
 			socket.emit('join_chat', chat._id);
+			sendLog({
+				metodo: 'socket',
+				peticion: 'chat/create',
+				respuesta: 'chat',
+				servicio: 'frontend',
+			});
 			setChats((chats) => {
 				const newChats = [...chats];
 				newChats.push(chat);

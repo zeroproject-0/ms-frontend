@@ -1,3 +1,4 @@
+import { sendLog } from '@/api/users';
 import { SocketContext as SocketContextType } from '@/types/Socket';
 import { createContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
@@ -23,6 +24,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 		setSessionID(localStorage.getItem('sessionID') || '');
 
 		function onSessionEvent(data: { sessionID: string }) {
+			sendLog({
+				metodo: 'socket',
+				peticion: 'chat/session',
+				respuesta: 'sessionID',
+				servicio: 'frontend',
+			});
 			localStorage.setItem('sessionID', data.sessionID);
 		}
 
